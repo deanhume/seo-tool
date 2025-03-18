@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿﻿﻿﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -36,69 +36,59 @@ namespace SeoTool
             string sitemapUrl = "https://deanhume.com/sitemap-posts.xml";
             string keyword = "Azure Function"; // The keyword to check for in title and description
 
-            // Create results file with date and time in the filename
-            string resultsFileName = $"results_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.txt";
-            StringBuilder resultsContent = new StringBuilder();
-
-            // Add header to results file
-            AppendToResults(resultsContent, "SEO TOOL - ANALYSIS RESULTS");
-            AppendToResults(resultsContent, $"Date: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
-            AppendToResults(resultsContent, $"Sitemap URL: {sitemapUrl}");
-            AppendToResults(resultsContent, $"Keyword: {keyword}");
-            AppendToResults(resultsContent, new string('=', 80));
-            AppendToResults(resultsContent, "");
+            // Initialize variables for tracking issues
+            StringBuilder issuesContent = new StringBuilder();
+            bool hasAnyIssues = false;
+            
+            // Add header to issues content
+            AppendToResults(issuesContent, "SEO TOOL - ISSUES REPORT");
+            AppendToResults(issuesContent, $"Date: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+            AppendToResults(issuesContent, $"Sitemap URL: {sitemapUrl}");
+            AppendToResults(issuesContent, $"Keyword: {keyword}");
+            AppendToResults(issuesContent, new string('=', 80));
+            AppendToResults(issuesContent, "");
 
             Console.WriteLine($"Fetching sitemap from: {sitemapUrl}");
-            AppendToResults(resultsContent, $"Fetching sitemap from: {sitemapUrl}");
 
             try
             {
                 // Fetch and parse the sitemap
                 var urls = await FetchSitemapUrlsAsync(sitemapUrl);
                 Console.WriteLine($"Found {urls.Count} URLs in sitemap");
-                AppendToResults(resultsContent, $"Found {urls.Count} URLs in sitemap");
-                AppendToResults(resultsContent, "");
+                AppendToResults(issuesContent, $"Found {urls.Count} URLs in sitemap");
+                AppendToResults(issuesContent, "");
 
                 int processedCount = 0;
                 int successCount = 0;
                 int issuesCount = 0;
+                int limitUrls = 15; // Limit to 15 URLs for demonstration
 
                 // Process each URL in the sitemap (limit to 5 for demonstration)
-                foreach (var url in urls.Take(15))
+                foreach (var url in urls.Take(limitUrls))
                 {
                     processedCount++;
-                    Console.WriteLine($"\n[{processedCount}/{Math.Min(5, urls.Count)}] Analyzing: {url}");
+                    Console.WriteLine($"\n[{processedCount}/{Math.Min(limitUrls, urls.Count)}] Analyzing: {url}");
 
-                    AppendToResults(resultsContent, $"[{processedCount}/{Math.Min(5, urls.Count)}] Analyzing: {url}");
+                    // Create a StringBuilder for this URL's issues (if any)
+                    StringBuilder urlIssuesContent = new StringBuilder();
+                    bool hasUrlIssues = false;
+                    
+                    // Add URL header to the URL issues content
+                    AppendToResults(urlIssuesContent, $"[{processedCount}/{Math.Min(limitUrls, urls.Count)}] Analyzing: {url}");
 
                     try
                     {
                         // Fetch HTML for the current URL
                         string html = await Utils.FetchHtmlAsync(url);
                         Console.WriteLine($"Successfully fetched {html.Length} characters of HTML");
-                        AppendToResults(resultsContent, $"Successfully fetched {html.Length} characters of HTML");
+                        AppendToResults(urlIssuesContent, $"Successfully fetched {html.Length} characters of HTML");
 
                         bool hasIssues = false;
 
                         // Extract and analyze the title
                         string title = ExtractTitle(html);
                         Console.WriteLine($"Title: {title}");
-                        AppendToResults(resultsContent, $"Title: {title}");
-
-                        //bool titleContainsKeyword = ContainsSimilarString(title, keyword);
-                        //Console.WriteLine($"Title contains keyword or similar: {(titleContainsKeyword ? "YES ✓" : "NO ✗")}");
-                        //AppendToResults(resultsContent, $"Title contains keyword or similar: {(titleContainsKeyword ? "YES ✓" : "NO ✗")}");
-                        //if (!titleContainsKeyword) hasIssues = true;
-
-                        // Extract and analyze the og:description
-                        //string ogDescription = ExtractOgDescription(html);
-                        //Console.WriteLine($"OG Description: {ogDescription}");
-                        //AppendToResults(resultsContent, $"OG Description: {ogDescription}");
-
-                        //bool descriptionContainsKeyword = ContainsSimilarString(ogDescription, keyword);
-                        //Console.WriteLine($"OG Description contains keyword or similar: {(descriptionContainsKeyword ? "YES ✓" : "NO ✗")}");
-                        //AppendToResults(resultsContent, $"OG Description contains keyword or similar: {(descriptionContainsKeyword ? "YES ✓" : "NO ✗")}");
-                        //if (!descriptionContainsKeyword) hasIssues = true;
+                        AppendToResults(urlIssuesContent, $"Title: {title}");
 
                         // Check for broken links and missing images
                         var (links, brokenLinks) = await CheckLinksAsync(html, url);
@@ -108,67 +98,84 @@ namespace SeoTool
                         if (brokenLinks.Count > 0)
                         {
                             Console.WriteLine($"⚠ Found {brokenLinks.Count} broken links out of {links.Count} total");
-                            AppendToResults(resultsContent, $"⚠ Found {brokenLinks.Count} broken links out of {links.Count} total");
+                            AppendToResults(urlIssuesContent, $"⚠ Found {brokenLinks.Count} broken links out of {links.Count} total");
 
-                            // List broken links in the results file
+                            // List broken links in the issues file
                             foreach (var link in brokenLinks)
                             {
-                                AppendToResults(resultsContent, $"  - {link.Url} ({link.StatusCode})");
+                                AppendToResults(urlIssuesContent, $"  - {link.Url} ({link.StatusCode})");
                             }
 
                             hasIssues = true;
+                            hasUrlIssues = true;
                         }
                         else
                         {
                             Console.WriteLine($"✓ No broken links found (checked {links.Count} links)");
-                            AppendToResults(resultsContent, $"✓ No broken links found (checked {links.Count} links)");
+                            AppendToResults(urlIssuesContent, $"✓ No broken links found (checked {links.Count} links)");
                         }
 
                         // Report on images
                         if (missingImages.Count > 0)
                         {
                             Console.WriteLine($"⚠ Found {missingImages.Count} missing images out of {images.Count} total");
-                            AppendToResults(resultsContent, $"⚠ Found {missingImages.Count} missing images out of {images.Count} total");
+                            AppendToResults(urlIssuesContent, $"⚠ Found {missingImages.Count} missing images out of {images.Count} total");
 
-                            // List missing images in the results file
+                            // List missing images in the issues file
                             foreach (var image in missingImages)
                             {
-                                AppendToResults(resultsContent, $"  - {image.Url} ({image.StatusCode})");
+                                AppendToResults(urlIssuesContent, $"  - {image.Url} ({image.StatusCode})");
                             }
 
                             hasIssues = true;
+                            hasUrlIssues = true;
                         }
                         else
                         {
                             Console.WriteLine($"✓ No missing images found (checked {images.Count} images)");
-                            AppendToResults(resultsContent, $"✓ No missing images found (checked {images.Count} images)");
+                            AppendToResults(urlIssuesContent, $"✓ No missing images found (checked {images.Count} images)");
                         }
 
                         // Overall assessment for this URL
                         if (hasIssues)
                         {
                             Console.WriteLine("⚠ This page has SEO issues that should be addressed");
-                            AppendToResults(resultsContent, "⚠ This page has SEO issues that should be addressed");
+                            AppendToResults(urlIssuesContent, "⚠ This page has SEO issues that should be addressed");
                             issuesCount++;
+                            
+                            // If this URL has issues, append its content to the main issues content
+                            if (hasUrlIssues)
+                            {
+                                hasAnyIssues = true;
+                                AppendToResults(issuesContent, urlIssuesContent.ToString());
+                                AppendToResults(issuesContent, new string('-', 80));
+                                AppendToResults(issuesContent, "");
+                            }
                         }
                         else
                         {
                             Console.WriteLine("✓ This page passes all SEO checks");
-                            AppendToResults(resultsContent, "✓ This page passes all SEO checks");
                             successCount++;
+                            // We don't append passing pages to the issues file
                         }
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine($"Error analyzing {url}: {ex.Message}");
-                        AppendToResults(resultsContent, $"Error analyzing {url}: {ex.Message}");
+                        // For errors, we still want to record them in the issues file
+                        AppendToResults(urlIssuesContent, $"Error analyzing {url}: {ex.Message}");
                         issuesCount++;
+                        hasUrlIssues = true;
+                        hasAnyIssues = true;
+                        
+                        // Append error information to the main issues content
+                        AppendToResults(issuesContent, urlIssuesContent.ToString());
+                        AppendToResults(issuesContent, new string('-', 80));
+                        AppendToResults(issuesContent, "");
                     }
 
-                    // Add a separator between URLs
+                    // Add a separator in the console output
                     Console.WriteLine(new string('-', 50));
-                    AppendToResults(resultsContent, new string('-', 80));
-                    AppendToResults(resultsContent, "");
                 }
 
                 // Summary report
@@ -177,23 +184,33 @@ namespace SeoTool
                 Console.WriteLine($"✓ {successCount} URLs passed all SEO checks");
                 Console.WriteLine($"⚠ {issuesCount} URLs have SEO issues that should be addressed");
 
-                AppendToResults(resultsContent, "SEO ANALYSIS SUMMARY:");
-                AppendToResults(resultsContent, $"Processed {processedCount} URLs from sitemap");
-                AppendToResults(resultsContent, $"✓ {successCount} URLs passed all SEO checks");
-                AppendToResults(resultsContent, $"⚠ {issuesCount} URLs have SEO issues that should be addressed");
+                // Add summary to the issues content
+                AppendToResults(issuesContent, "SEO ANALYSIS SUMMARY:");
+                AppendToResults(issuesContent, $"Processed {processedCount} URLs from sitemap");
+                AppendToResults(issuesContent, $"✓ {successCount} URLs passed all SEO checks");
+                AppendToResults(issuesContent, $"⚠ {issuesCount} URLs have SEO issues that should be addressed");
 
-                // Write results to file
-                File.WriteAllText(resultsFileName, resultsContent.ToString());
-                Console.WriteLine($"\nResults saved to: {resultsFileName}");
+                // Only write to file if there are issues
+                if (hasAnyIssues)
+                {
+                    string resultsFileName = $"issues_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.txt";
+                    File.WriteAllText(resultsFileName, issuesContent.ToString());
+                    Console.WriteLine($"\nIssues report saved to: {resultsFileName}");
+                }
+                else
+                {
+                    Console.WriteLine("\nNo SEO issues found. No report file was generated.");
+                }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error: {ex.Message}");
-                AppendToResults(resultsContent, $"Error: {ex.Message}");
+                AppendToResults(issuesContent, $"Error: {ex.Message}");
 
-                // Write results to file even if there was an error
-                File.WriteAllText(resultsFileName, resultsContent.ToString());
-                Console.WriteLine($"\nPartial results saved to: {resultsFileName}");
+                // Write results to file if there was an error
+                string resultsFileName = $"issues_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.txt";
+                File.WriteAllText(resultsFileName, issuesContent.ToString());
+                Console.WriteLine($"\nError report saved to: {resultsFileName}");
             }
         }
 
