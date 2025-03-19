@@ -1,4 +1,4 @@
-[SEO Tool](/logo.jpg)
+![SEO Tool](/logo.jpg)
 ## SEO TOOL
 
 This is a cheeky little SEO tool that takes in a sitemap.xml file and loops through all the URLs.
