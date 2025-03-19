@@ -17,6 +17,8 @@ namespace SeoTool
 
             // Add a user agent to avoid being blocked by some websites
             client.DefaultRequestHeaders.Add("User-Agent", "SEO-Tool/1.0");
+            client.DefaultRequestHeaders.Add("cache-control", "no-cache");
+            client.DefaultRequestHeaders.Add("cache-control", "no-store");
 
             // Send the GET request and get the response
             HttpResponseMessage response = await client.GetAsync(url);

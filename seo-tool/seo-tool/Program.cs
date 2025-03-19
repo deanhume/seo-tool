@@ -1,4 +1,4 @@
-﻿﻿﻿﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -34,7 +34,17 @@ namespace SeoTool
             Console.WriteLine("------------------------");
 
             string sitemapUrl = "https://deanhume.com/sitemap-posts.xml";
-            string keyword = "Azure Function"; // The keyword to check for in title and description
+            
+            // A list of URLs to ignore these might have weird issues.
+            List<string> urlsToIgnore = new List<string>
+            {
+                "https://deanhume.com/azure-hybrid-and-embedded-text-to-speech/",
+                "https://deanhume.com/book-the-people-manager/",
+                "https://deanhume.com/accelerate-devops-book-review/",
+                "https://deanhume.com/progressive-web-apps-book-giveaway-results/",
+                "https://deanhume.com/chrome-internal-urls-the-door-to-narnia/",
+                "https://deanhume.com/a-simple-client-side-approach-to-measuring-speed-index/"
+            };
 
             // Initialize variables for tracking issues
             StringBuilder issuesContent = new StringBuilder();
@@ -44,7 +54,6 @@ namespace SeoTool
             AppendToResults(issuesContent, "SEO TOOL - ISSUES REPORT");
             AppendToResults(issuesContent, $"Date: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
             AppendToResults(issuesContent, $"Sitemap URL: {sitemapUrl}");
-            AppendToResults(issuesContent, $"Keyword: {keyword}");
             AppendToResults(issuesContent, new string('=', 80));
             AppendToResults(issuesContent, "");
 
@@ -61,11 +70,12 @@ namespace SeoTool
                 int processedCount = 0;
                 int successCount = 0;
                 int issuesCount = 0;
-                int limitUrls = 15; // Limit to 15 URLs for demonstration
+                int limitUrls = 30; // Limit to 30 URLs for demonstration
 
-                // Process each URL in the sitemap (limit to 5 for demonstration)
+                // Process each URL in the sitemap (limit to 30 for demonstration)
                 foreach (var url in urls.Take(limitUrls))
                 {
+
                     processedCount++;
                     Console.WriteLine($"\n[{processedCount}/{Math.Min(limitUrls, urls.Count)}] Analyzing: {url}");
 
@@ -78,6 +88,14 @@ namespace SeoTool
 
                     try
                     {
+                        // Check if the URL is in the ignore list
+                        if (urlsToIgnore.Contains(url))
+                        {
+                            Console.WriteLine($"Skipping ignored URL: {url}");
+                            AppendToResults(urlIssuesContent, $"Skipping ignored URL: {url}");
+                            continue;
+                        }
+
                         // Fetch HTML for the current URL
                         string html = await Utils.FetchHtmlAsync(url);
                         Console.WriteLine($"Successfully fetched {html.Length} characters of HTML");
