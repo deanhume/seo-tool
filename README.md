@@ -1,5 +1,7 @@
 <img src="logo.jpg" alt="seo tool logo" width="400"/>
 
+![Test results](https://github.com/deanhume/seo-tool/actions/workflows/dotnet.yml/badge.svg)
+
 ## SEO TOOL
 
 This is a cheeky little SEO tool that takes in a sitemap.xml file and loops through all the URLs.

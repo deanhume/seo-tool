@@ -1,13 +1,5 @@
-﻿﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
+﻿﻿using System.Net;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Xml;
 using static SeoTool.Utils;
 
 namespace SeoTool
@@ -17,6 +9,19 @@ namespace SeoTool
     /// </summary>
     public class Program
     {
+        public static string sitemapUrl = "https://deanhume.com/sitemap-posts.xml";
+
+        // A list of URLs to ignore these might have weird issues.
+        public static List<string> urlsToIgnore = new List<string>
+        {
+            "https://deanhume.com/azure-hybrid-and-embedded-text-to-speech/",
+            "https://deanhume.com/book-the-people-manager/",
+            "https://deanhume.com/accelerate-devops-book-review/",
+            "https://deanhume.com/progressive-web-apps-book-giveaway-results/",
+            "https://deanhume.com/chrome-internal-urls-the-door-to-narnia/",
+            "https://deanhume.com/a-simple-client-side-approach-to-measuring-speed-index/"
+        };
+
         /// <summary>
         /// Entry point for the application
         /// </summary>
@@ -33,23 +38,10 @@ namespace SeoTool
             Console.WriteLine("SEO Tool - HTML Analyzer");
             Console.WriteLine("------------------------");
 
-            string sitemapUrl = "https://deanhume.com/sitemap-posts.xml";
-            
-            // A list of URLs to ignore these might have weird issues.
-            List<string> urlsToIgnore = new List<string>
-            {
-                "https://deanhume.com/azure-hybrid-and-embedded-text-to-speech/",
-                "https://deanhume.com/book-the-people-manager/",
-                "https://deanhume.com/accelerate-devops-book-review/",
-                "https://deanhume.com/progressive-web-apps-book-giveaway-results/",
-                "https://deanhume.com/chrome-internal-urls-the-door-to-narnia/",
-                "https://deanhume.com/a-simple-client-side-approach-to-measuring-speed-index/"
-            };
-
             // Initialize variables for tracking issues
             StringBuilder issuesContent = new StringBuilder();
             bool hasAnyIssues = false;
-            
+
             // Add header to issues content
             AppendToResults(issuesContent, "SEO TOOL - ISSUES REPORT");
             AppendToResults(issuesContent, $"Date: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
@@ -82,7 +74,7 @@ namespace SeoTool
                     // Create a StringBuilder for this URL's issues (if any)
                     StringBuilder urlIssuesContent = new StringBuilder();
                     bool hasUrlIssues = false;
-                    
+
                     // Add URL header to the URL issues content
                     AppendToResults(urlIssuesContent, $"[{processedCount}/{Math.Min(limitUrls, urls.Count)}] Analyzing: {url}");
 
@@ -160,7 +152,7 @@ namespace SeoTool
                             Console.WriteLine("⚠ This page has SEO issues that should be addressed");
                             AppendToResults(urlIssuesContent, "⚠ This page has SEO issues that should be addressed");
                             issuesCount++;
-                            
+
                             // If this URL has issues, append its content to the main issues content
                             if (hasUrlIssues)
                             {
@@ -185,7 +177,7 @@ namespace SeoTool
                         issuesCount++;
                         hasUrlIssues = true;
                         hasAnyIssues = true;
-                        
+
                         // Append error information to the main issues content
                         AppendToResults(issuesContent, urlIssuesContent.ToString());
                         AppendToResults(issuesContent, new string('-', 80));
