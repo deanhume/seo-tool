@@ -104,7 +104,7 @@ namespace SeoTool
                         bool hasIssues = false;
 
                         // Extract and analyze the title
-                        string title = ExtractTitle(html);
+                        string title = HtmlUtils.ExtractTitle(html);
                         Console.WriteLine($"Title: {title}");
                         AppendToResults(urlIssuesContent, $"Title: {title}");
 
@@ -240,117 +240,6 @@ namespace SeoTool
         private static void AppendToResults(StringBuilder sb, string line)
         {
             sb.AppendLine(line);
-        }
-
-        /// <summary>
-        /// Extracts the title from HTML content
-        /// </summary>
-        /// <param name="html">The HTML content to parse</param>
-        /// <returns>The title text or "No title found" if not present</returns>
-        private static string ExtractTitle(string html)
-        {
-            // Use regex to extract the content between <title> tags
-            var titleMatch = Regex.Match(html, @"<title>(.*?)</title>", RegexOptions.IgnoreCase | RegexOptions.Singleline);
-
-            if (titleMatch.Success && titleMatch.Groups.Count > 1)
-            {
-                return titleMatch.Groups[1].Value.Trim();
-            }
-
-            return "No title found";
-        }
-
-        /// <summary>
-        /// Extracts the Open Graph description from HTML content
-        /// </summary>
-        /// <param name="html">The HTML content to parse</param>
-        /// <returns>The OG description or "No OG description found" if not present</returns>
-        private static string ExtractOgDescription(string html)
-        {
-            // Use regex to extract the content of meta tag with property="og:description"
-            var ogDescMatch = Regex.Match(html, @"<meta\s+property=""og:description""\s+content=""(.*?)""", RegexOptions.IgnoreCase | RegexOptions.Singleline);
-
-            if (ogDescMatch.Success && ogDescMatch.Groups.Count > 1)
-            {
-                return ogDescMatch.Groups[1].Value.Trim();
-            }
-
-            // Try alternate format with property and content in different order
-            ogDescMatch = Regex.Match(html, @"<meta\s+content=""(.*?)""\s+property=""og:description""", RegexOptions.IgnoreCase | RegexOptions.Singleline);
-
-            if (ogDescMatch.Success && ogDescMatch.Groups.Count > 1)
-            {
-                return ogDescMatch.Groups[1].Value.Trim();
-            }
-
-            return "No OG description found";
-        }
-
-        /// <summary>
-        /// Checks if a text contains a keyword or similar terms
-        /// </summary>
-        /// <param name="text">The text to check</param>
-        /// <param name="keyword">The keyword to look for</param>
-        /// <returns>True if the text contains the keyword or similar terms</returns>
-        private static bool ContainsSimilarString(string text, string keyword)
-        {
-            if (string.IsNullOrEmpty(text) || string.IsNullOrEmpty(keyword))
-            {
-                return false;
-            }
-
-            // Convert both to lowercase for case-insensitive comparison
-            text = text.ToLower();
-            keyword = keyword.ToLower();
-
-            // Direct match check
-            if (text.Contains(keyword))
-            {
-                return true;
-            }
-
-            // Check for individual words in the keyword
-            string[] keywordWords = keyword.Split(new[] { ' ', ',', '.', ';', ':', '-', '_' }, StringSplitOptions.RemoveEmptyEntries);
-
-            // If at least half of the keyword words are found, consider it a match
-            int matchCount = 0;
-            foreach (string word in keywordWords)
-            {
-                if (word.Length > 2 && text.Contains(word)) // Only check words longer than 2 characters
-                {
-                    matchCount++;
-                }
-            }
-
-            // Consider it a match if at least half of the keyword words are found
-            return keywordWords.Length > 0 && (double)matchCount / keywordWords.Length >= 0.5;
-        }
-
-        /// <summary>
-        /// Resolves a relative URL to an absolute URL
-        /// </summary>
-        /// <param name="baseUrl">The base URL of the page</param>
-        /// <param name="relativeUrl">The relative URL to resolve</param>
-        /// <returns>The absolute URL</returns>
-        private static string ResolveUrl(string baseUrl, string relativeUrl)
-        {
-            if (string.IsNullOrEmpty(relativeUrl))
-                return baseUrl;
-
-            if (Uri.TryCreate(relativeUrl, UriKind.Absolute, out _))
-                return relativeUrl;
-
-            if (relativeUrl.StartsWith("//"))
-            {
-                var baseUri = new Uri(baseUrl);
-                return $"{baseUri.Scheme}:{relativeUrl}";
-            }
-
-            if (!baseUrl.EndsWith("/"))
-                baseUrl = baseUrl + "/";
-
-            var uri = new Uri(new Uri(baseUrl), relativeUrl);
-            return uri.ToString();
         }
 
         /// <summary>

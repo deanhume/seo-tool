@@ -1,4 +1,5 @@
 <img src="logo.jpg" alt="seo tool logo" width="400"/>
+
 ## SEO TOOL
 
 This is a cheeky little SEO tool that takes in a sitemap.xml file and loops through all the URLs.

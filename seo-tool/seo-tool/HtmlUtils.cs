@@ -55,5 +55,23 @@ namespace SeoTool
 
             return images;
         }
+
+        /// <summary>
+        /// Extracts the title from HTML content
+        /// </summary>
+        /// <param name="html">The HTML content to parse</param>
+        /// <returns>The title text or "No title found" if not present</returns>
+        public static string ExtractTitle(string html)
+        {
+            // Use regex to extract the content between <title> tags
+            var titleMatch = Regex.Match(html, @"<title>(.*?)</title>", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+
+            if (titleMatch.Success && titleMatch.Groups.Count > 1)
+            {
+                return titleMatch.Groups[1].Value.Trim();
+            }
+
+            return "No title found";
+        }
     }
 }

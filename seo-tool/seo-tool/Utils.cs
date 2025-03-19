@@ -97,6 +97,33 @@ namespace SeoTool
         }
 
         /// <summary>
+        /// Resolves a relative URL to an absolute URL
+        /// </summary>
+        /// <param name="baseUrl">The base URL of the page</param>
+        /// <param name="relativeUrl">The relative URL to resolve</param>
+        /// <returns>The absolute URL</returns>
+        public static string ResolveUrl(string baseUrl, string relativeUrl)
+        {
+            if (string.IsNullOrEmpty(relativeUrl))
+                return baseUrl;
+
+            if (Uri.TryCreate(relativeUrl, UriKind.Absolute, out _))
+                return relativeUrl;
+
+            if (relativeUrl.StartsWith("//"))
+            {
+                var baseUri = new Uri(baseUrl);
+                return $"{baseUri.Scheme}:{relativeUrl}";
+            }
+
+            if (!baseUrl.EndsWith("/"))
+                baseUrl = baseUrl + "/";
+
+            var uri = new Uri(new Uri(baseUrl), relativeUrl);
+            return uri.ToString();
+        }
+
+        /// <summary>
         /// Represents a URL resource with its HTTP status
         /// </summary>
         public class UrlResource

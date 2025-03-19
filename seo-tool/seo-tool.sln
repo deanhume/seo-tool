@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "seo-tool", "seo-tool\seo-tool.csproj", "{4F077AB0-17C6-4B8D-A8E7-315BC9BB70B3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "set-tool-test", "set-tool-test\set-tool-test.csproj", "{50A24360-6592-4B1A-A68D-2C8D6A6B49C0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,13 @@ Global
 		{4F077AB0-17C6-4B8D-A8E7-315BC9BB70B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4F077AB0-17C6-4B8D-A8E7-315BC9BB70B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4F077AB0-17C6-4B8D-A8E7-315BC9BB70B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{53E97697-24A4-4265-A656-0DA2B5B5F9BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53E97697-24A4-4265-A656-0DA2B5B5F9BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{53E97697-24A4-4265-A656-0DA2B5B5F9BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53E97697-24A4-4265-A656-0DA2B5B5F9BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50A24360-6592-4B1A-A68D-2C8D6A6B49C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50A24360-6592-4B1A-A68D-2C8D6A6B49C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50A24360-6592-4B1A-A68D-2C8D6A6B49C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50A24360-6592-4B1A-A68D-2C8D6A6B49C0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
